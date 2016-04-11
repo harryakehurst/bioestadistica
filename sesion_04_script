@@ -42,29 +42,38 @@ chisq.test(grade_x_sex)$method
 
 # to use continuity correction, we need a 2x2 cross-table
 # therefore we first create a second binary variable
-data_01$tall <- factor(data_01$height > median(data_01$height), levels=c(TRUE, FALSE), labels=c("Tall", "Short"))
+data_01$tall <- factor(data_01$height > median(data_01$height), 
+                       levels=c(TRUE, FALSE),
+                       labels=c("Tall", "Short"))
 tall_x_sex <- table(data_01$tall, data_01$sex)
 tall_x_sex
 
+# re-sample for n = 30
+set.seed(10) # for reproducibility
+data_30 <- data_01[sample(1:500, 30),]
+tall_x_sex_30 <- table(data_30$tall, data_30$sex)
+
 # check margins and proportions
-addmargins(tall_x_sex)
-prop.table(tall_x_sex, 1)
-prop.table(tall_x_sex, 2)
+addmargins(tall_x_sex_30)
+prop.table(tall_x_sex_30, 1)
+prop.table(tall_x_sex_30, 2)
 
 # Chi-squared test
-chisq.test(tall_x_sex)
-chisq.test(tall_x_sex)$method
-chisq.test(tall_x_sex)$observed
-chisq.test(tall_x_sex)$expected
+chisq.test(tall_x_sex_30)
+chisq.test(tall_x_sex_30)$method
+chisq.test(tall_x_sex_30)$observed
+chisq.test(tall_x_sex_30)$expected
 
 # continuity correction is applied by default for 2x2 tables
 # we can turn it off
-chisq.test(tall_x_sex, correct=FALSE)
-chisq.test(tall_x_sex, correct=FALSE)$method
+chisq.test(tall_x_sex_30, correct=FALSE)
+chisq.test(tall_x_sex_30, correct=FALSE)$method
 
 # Fisher's exact test is used where an expected value is <2
 # we will need another binary variable
-data_01$severely_obese <- factor(data_01$weight/((data_01$height/100)^2) > 35, levels=c(TRUE, FALSE), labels=c("Severely obese", "BMI < 35"))
+data_01$severely_obese <- factor(data_01$weight/((data_01$height/100)^2) > 35,
+                                 levels=c(TRUE, FALSE),
+                                 labels=c("Severely obese", "BMI < 35"))
 severely_obese_x_sex <- table(data_01$severely_obese, data_01$sex)
 
 # we get a warning message if we try a Chi-squared test
