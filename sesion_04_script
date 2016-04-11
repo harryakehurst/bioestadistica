@@ -100,3 +100,20 @@ t.test(weight ~ sex, data=data_01)
 ci <- t.test(weight ~ sex, data=data_01)$conf.int
 
 ### Paired data
+# load some paired data
+data_01_jumps <- read.csv("data_01_jumps.csv", header=TRUE)
+data_01 <- merge(data_01, data_01_jumps, by="id")
+
+# describe it
+summary(data_01$jump_1)
+summary(data_01$jump_2)
+summary(data_01$jump_1 - data_01$jump_2)
+boxplot(data_01$jump_1)
+boxplot(data_01$jump_2)
+boxplot(data_01$jump_1 - data_01$jump_2)
+
+# check whether difference is normal
+shapiro.test(data_01$jump_1 - data_01$jump_2)
+
+# paired t-test
+t.test(data_01$jump_1, data_01$jump_2, paired=TRUE)
