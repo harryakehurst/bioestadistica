@@ -1,0 +1,102 @@
+#### Session 04: testing associations and parametric means
+#### Harold Akehurst April 2016
+
+# Import and merge "data_01_bio.csv" and "data_01_grades.csv"
+# See session 01 code
+
+### Recap frequency tables
+# print a cross-table
+table(data_01$grade, data_01$sex)
+
+# assign a cross table to an R object called 'grade_x_sex'
+# print the object to check that it matches the previous table
+grade_x_sex <- table(data_01$grade, data_01$sex)
+grade_x_sex
+
+# add  row and column totals
+addmargins(grade_x_sex)
+
+# look at row and column proportions
+prop.table(grade_x_sex, 1)
+prop.table(grade_x_sex, 2)
+
+# note that functions can be used as the argument of an enclosing function
+round(addmargins(prop.table(table(data_01$grade, data_01$sex))),2)
+
+# charts
+plot(grade_x_sex)
+
+### Testing associations between categorical variables
+# Chi-squared test
+chisq.test(grade_x_sex)
+
+# access the observed and expected values
+chisq.test(grade_x_sex)$observed
+chisq.test(grade_x_sex)$expected
+
+# difference
+chisq.test(grade_x_sex)$observed - chisq.test(grade_x_sex)$expected
+
+# check the method used
+chisq.test(grade_x_sex)$method
+
+# to use continuity correction, we need a 2x2 cross-table
+# therefore we first create a second binary variable
+data_01$tall <- factor(data_01$height > median(data_01$height), levels=c(TRUE, FALSE), labels=c("Tall", "Short"))
+tall_x_sex <- table(data_01$tall, data_01$sex)
+tall_x_sex
+
+# check margins and proportions
+addmargins(tall_x_sex)
+prop.table(tall_x_sex, 1)
+prop.table(tall_x_sex, 2)
+
+# Chi-squared test
+chisq.test(tall_x_sex)
+chisq.test(tall_x_sex)$method
+chisq.test(tall_x_sex)$observed
+chisq.test(tall_x_sex)$expected
+
+# continuity correction is applied by default for 2x2 tables
+# we can turn it off
+chisq.test(tall_x_sex, correct=FALSE)
+chisq.test(tall_x_sex, correct=FALSE)$method
+
+# Fisher's exact test is used where an expected value is <2
+# we will need another binary variable
+data_01$severely_obese <- factor(data_01$weight/((data_01$height/100)^2) > 35, levels=c(TRUE, FALSE), labels=c("Severely obese", "BMI < 35"))
+severely_obese_x_sex <- table(data_01$severely_obese, data_01$sex)
+
+# we get a warning message if we try a Chi-squared test
+chisq.test(severely_obese_x_sex)
+chisq.test(severely_obese_x_sex)$expected
+chisq.test(severely_obese_x_sex)$method
+
+# in this case we ca use a Fisher's exact test
+fisher.test(severely_obese_x_sex)
+
+### Recap summaries of continuous data
+summary(data_01$weight)
+sd(data_01$weight)
+boxplot(data_01$weight)
+by(data_01$weight, data_01$sex, summary)
+boxplot(weight ~ sex, data=data_01)
+
+### Checking the assumptions of t-tests
+# there are several tests which help us decide whether data is Normal
+ks.test(data_01$weight, "pnorm", mean(data_01$weight), sd(data_01$weight))
+shapiro.test(data_01$weight)
+
+# we need to check whether both groups are Normal
+by(data_01$weight, data_01$sex, shapiro.test)
+
+# and we need to check for homogeneity of variances
+bartlett.test(weight ~ sex, data=data_01)
+
+### t-tests
+t.test(weight ~ sex, data=data_01)
+
+# extract the confidence interval
+ci <- t.test(weight ~ sex, data=data_01)$conf.int
+
+### Paired data
